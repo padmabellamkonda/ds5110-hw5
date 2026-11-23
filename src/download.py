@@ -5,8 +5,7 @@ from urllib.request import urlretrieve
 
 # Copy the link to AmesHousing.txt from the JSE article page (De Cock, 2011).
 # Record the same URL and today's date in README.md.
-DATA_URL = ""
-
+DATA_URL = "https://jse.amstat.org/v19n3/decock/AmesHousing.txt"
 
 def main(dest: str) -> None:
     path = Path(dest)
