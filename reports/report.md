@@ -2,8 +2,63 @@
 
 ## 1 Provenance
 ## 2 Validation: failures on the raw file
+| Check | Column | Failures | What I did |
+|---|---|---|---|
+| Value outside range | Garage Yr Blt | 1 | Set the value to missing. It was outside 1850 to 2010. |
+| Code not in dictionary | MS Zoning | 29 | Changed to the dictionary codes (A, C, I). |
+| Code not in dictionary | Bldg Type | 272 | Changed to the dictionary codes (2FmCon, Duplx, TwnhsI). TwnhsI is my inference. |
+| Code not in dictionary | Neighborhood | 443 | Changed NAmes to Names. |
+| Cross-column | Year Remod/Add before Year Built | 1 | Set the remodel year to missing. The true value is unknown. |
 ## 3 Sentinels and structural absence
+| Column | Rows with "NA" |
+|---|---|
+| Alley | 2732 |
+| Bsmt Qual | 79 |
+| Bsmt Cond | 79 |
+| Bsmt Exposure | 79 |
+| BsmtFin Type 1 | 79 |
+| BsmtFin Type 2 | 79 |
+| Fireplace Qu | 1422 |
+| Garage Type | 157 |
+| Garage Finish | 157 |
+| Garage Qual | 158 |
+| Garage Cond | 158 |
+| Pool QC | 2917 |
+| Fence | 2358 |
+| Misc Feature | 2824 |
+
+| Column | Zeros | Sentinel |
+|---|---|---|
+| Garage Area | 157 | No. True zero. |
+| Pool Area | 2917 | No. True zero. |
+| Fireplaces | 1422 | No. True zero. |
+| Total Bsmt SF | 79 | No. True zero. |
+| Misc Val | 2827 | No. True zero. |
+
+I treat "NA" as none only where a numeric column says the feature is absent (for example Garage Area is 0). Everywhere else I treat it as unknown and set it to missing.
+
 ## 4 Keys and duplicates
+
+I tested two candidate keys. `Order` is unique in all 2930 rows. `PID` is also unique in all 2930 rows.
+
+`Order` is the row number in the file. It identifies one row. `PID` is the parcel ID. It identifies one property. I chose `Order` as the key for one sale.
+
+| Check | Count |
+|---|---|
+| Exact copies | 0 |
+| Same key (`Order`) | 0 |
+| Same key (`PID`) | 0 |
+
+I built a lookup table with one row per Neighborhood and its full name from the dictionary. I joined it to the sales with `pd.merge(..., validate="many_to_one")`.
+
+| Step | Rows |
+|---|---|
+| Sales before the join | 2930 |
+| Sales after the join | 2930 |
+| Unmatched Neighborhoods | 0 |
+
+The row count did not change. Joins duplicate too. `validate=` raises an error if a key repeats, so the row count cannot change without me knowing.
+
 ## 5 Missingness mechanism
 Missing: 490 of 2,930 houses (16.7)
 
