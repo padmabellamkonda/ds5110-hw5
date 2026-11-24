@@ -19,9 +19,17 @@ make all
 | Terms of use |Free to be used in teaching if cited (https://jse.amstat.org/jse_users.htm) |
 | Rows, columns on arrival | 2,930 rows, 82 columns |
 
+
 ## Features used in Part 7
 
-List the 8 to 15 numeric columns in `NUMERIC_FEATURES`, and why.
+Nine numeric columns:
+- Lot Frontage: the column with missing values that Part 6 fills.
+- Lot Area, Gr Liv Area, 1st Flr SF: size of the lot and the house.
+- Year Built, Overall Qual, Overall Cond: age and condition.
+- Full Bath, Fireplaces: amenities.
+
+I chose columns that affect price. Only Lot Frontage has missing values (490). I also wanted it to be consistent with what I used in Part 6.
+
 
 ## AI assistance
 

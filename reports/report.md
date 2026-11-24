@@ -58,4 +58,27 @@ The median fill creates a spike at 68, where 490 houses now share one value. The
 
 I choose the iterative fill. In Part 5, Lot Frontage looked MAR. it is missing more often for cul-de-sac and irregular lots and for larger lots, and all of these are observed. Under MAR, the variables that predict missingness belong in the imputation model. The iterative fill uses Lot Area, living area, year built and quality, so the filled values depend on what predicts the gaps. The median fill ignores them. It gives all 490 houses the value 68, and it shrinks the std from 23.4 to 21.3. The iterative fill keeps the std at 22.8. Its cost is that the correlation with Lot Area rises from 0.49 to 0.57, because fills sit on the line with no noise. It also does not use Lot Config, which is categorical. If the data were MNAR, neither fill would fix it.
 ## 7 Leakage-safe evaluation
+Features: the nine columns listed in the README. Only Lot Frontage has missing values (490).
+
+| Variant | Fill | RMSE |
+| --- | --- | --- |
+| A | median Lot Frontage within SalePrice quintiles, full table | 0.1620 |
+| B | iterative fill on the full table, before CV | 0.1621 |
+| C | iterative fill inside a Pipeline | 0.1622 |
+
+(2930, 9) 490
+A 0.162
+B 0.1621
+C 0.1622
+
+**Which gives correct values?** C. An imputer is a fitted model. It learns from training rows only. In C the imputer sits inside the pipeline, so cross-validation refits it per fold and the test fold never informs its own fill. A step that learns from data belongs inside the pipeline.
+
+**Which leaks, and how?**
+- A is target leakage: the fill uses the label. The filled value encodes the answer. Here the label is SalePrice.
+- B is contamination: the fill uses test rows. The imputer was fitted on the full table before the split.
+- A leak shows up as a score that is too good. A has the lowest RMSE, 0.1620.
+
+**Which could not price an unsold house?** A. At prediction time, SalePrice is unknown. The quintile fill cannot exist.
+
+**B versus C:** B is 0.1621 and C is 0.1622, a difference of about 0.0001. Contamination is small with a median and larger with KNN or iterative fills. In this case it is small. Only Lot Frontage has gaps, and the table has 2,930 rows.
 ## 8 What this data cannot tell you
