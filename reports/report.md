@@ -45,5 +45,17 @@ What the data cannot tell me: Only 23 houses are missing, so the shares are nois
 Question: If Lot Frontage were MNAR, the missing value would be the reason it is missing. A cul-de-sac lot has a short, curved edge on the street, so its frontage is hard to measure, and the assessor may leave very small or odd values blank. Then the houses with the strangest frontage would be the ones missing, and the evidence would sit in those missing values, so no observed column could show it.
 
 ## 6 Imputation strategy and defense (at most 150 words)
+| Strategy | std before | std after | corr with Lot Area before | corr with Lot Area after |
+| --- | --- | --- | --- | --- |
+| Median (68.0) | 23.4 | 21.3 | 0.49 | 0.36 |
+| Iterative (uses other columns) | 23.4 | 22.8 | 0.49 | 0.57 |
+
+![Lot Frontage, median fill](figures/lot_frontage_median.png)
+
+![Lot Frontage, iterative fill](figures/lot_frontage_iterative.png)
+
+The median fill creates a spike at 68, where 490 houses now share one value. The iterative fill spreads the filled values out, so the shape stays closer to the observed data.
+
+I choose the iterative fill. In Part 5, Lot Frontage looked MAR. it is missing more often for cul-de-sac and irregular lots and for larger lots, and all of these are observed. Under MAR, the variables that predict missingness belong in the imputation model. The iterative fill uses Lot Area, living area, year built and quality, so the filled values depend on what predicts the gaps. The median fill ignores them. It gives all 490 houses the value 68, and it shrinks the std from 23.4 to 21.3. The iterative fill keeps the std at 22.8. Its cost is that the correlation with Lot Area rises from 0.49 to 0.57, because fills sit on the line with no noise. It also does not use Lot Config, which is categorical. If the data were MNAR, neither fill would fix it.
 ## 7 Leakage-safe evaluation
 ## 8 What this data cannot tell you
