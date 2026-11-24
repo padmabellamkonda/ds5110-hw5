@@ -1,6 +1,9 @@
 # HW5 report
 
 ## 1 Provenance
+
+I downloaded the Ames Housing data from https://jse.amstat.org/v19n3/decock/AmesHousing.txt on 2026-11-21 (De Cock, 2011). The terms say it is free to be used in teaching if cited. The file had 2,930 rows and 82 columns on arrival. `src/download.py` refuses to overwrite an existing raw file.
+
 ## 2 Validation: failures on the raw file
 | Check | Column | Failures | What I did |
 |---|---|---|---|
@@ -37,6 +40,9 @@
 
 I treat "NA" as none only where a numeric column says the feature is absent (for example Garage Area is 0). Everywhere else I treat it as unknown and set it to missing.
 
+Garage Qual and Garage Cond have 158 instead of 157. One house (Order 1357) has a detached garage of 360 sq ft but "NA" for quality and condition. That contradicts the dictionary, so `clean.py` sets those two values to missing.
+
+pandas also turned "None" into missing in Mas Vnr Type (1752 rows). The dictionary says "None" means no masonry veneer. This is a category it should not be documented as missing. 
 ## 4 Keys and duplicates
 
 I tested two candidate keys. `Order` is unique in all 2930 rows. `PID` is also unique in all 2930 rows.
@@ -60,7 +66,7 @@ I built a lookup table with one row per Neighborhood and its full name from the 
 The row count did not change. Joins duplicate too. `validate=` raises an error if a key repeats, so the row count cannot change without me knowing.
 
 ## 5 Missingness mechanism
-Missing: 490 of 2,930 houses (16.7)
+Missing: 490 of 2,930 houses (16.7%)
 
 | Compare | Value present | Value missing |
 | --- | --- | --- |
@@ -80,8 +86,8 @@ What the data cannot tell me: MAR versus MNAR cannot be tested from the data. Th
 
 Column picked: Mas Vnr Area
 
-Missing: 23 of 2,930 houses (0.8
-)
+Missing: 23 of 2,930 houses (0.8%)
+
 | Compare | Value present | Value missing |
 | --- | --- | --- |
 | Mean Lot Area | 10,141 | 10,984 |
@@ -97,7 +103,7 @@ Evidence: Clear difference on observed columns → not MCAR. Houses missing Mas 
 What the data cannot tell me: Only 23 houses are missing, so the shares are noisy. MAR versus MNAR cannot be tested from the data. The evidence would sit in the values that are missing.
 
 
-Question: If Lot Frontage were MNAR, the missing value would be the reason it is missing. A cul-de-sac lot has a short, curved edge on the street, so its frontage is hard to measure, and the assessor may leave very small or odd values blank. Then the houses with the strangest frontage would be the ones missing, and the evidence would sit in those missing values, so no observed column could show it.
+If Lot Frontage were MNAR, the missing value would be the reason it is missing. A cul-de-sac lot has a short, curved edge on the street, so its frontage is hard to measure, and the assessor may leave very small or odd values blank. Then the houses with the strangest frontage would be the ones missing, and the evidence would sit in those missing values, so no observed column could show it.
 
 ## 6 Imputation strategy and defense (at most 150 words)
 | Strategy | std before | std after | corr with Lot Area before | corr with Lot Area after |
@@ -137,3 +143,11 @@ C 0.1622
 
 **B versus C:** B is 0.1621 and C is 0.1622, a difference of about 0.0001. Contamination is small with a median and larger with KNN or iterative fills. In this case it is small. Only Lot Frontage has gaps, and the table has 2,930 rows.
 ## 8 What this data cannot tell you
+
+I rejected MCAR for Lot Frontage with data. Houses with and without a value differ on observed columns. MAR versus MNAR cannot be tested from the data. The evidence would sit in the values that are missing. My MAR argument comes from domain knowledge, not proof. If Lot Frontage is MNAR, no method in my Part 6 table fixes it.
+
+Every fill distorts something. Median fill lowered the spread from 23.4 to 21.3 and the correlation from 0.49 to 0.36. Iterative fill kept more of the spread (22.8), but it pushed the correlation up to 0.57, because fills sit on the line with no noise.
+
+Some of my fixes are assumptions. The 1850 lower bound is my choice. I inferred TwnhsI for Twnhs. The true values for the three houses I set to missing are unknown.
+
+In Part 7 the three RMSE values were almost the same (0.162). So the fill choice did not change the score here. That does not show the fill is right.
