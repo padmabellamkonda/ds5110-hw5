@@ -36,4 +36,5 @@ I chose columns that affect price. Only Lot Frontage has missing values (490). I
 Claude: 
 - Report.md: format tables from output data, help with spelling issues, and helped me reword into technical terms.
 - When running ames.clean, I couldnt see both tables because of warnings in my terminal. I consulted claude to help me figure this is out so I could see both tables.
-- Helped me understand terms and concepts in the pdf that I was confused on . 
+- Helped me understand terms and concepts in the pdf that I was confused on.
+- Helped with cleaning up src/download.py, src/validate.py and src/clean.py for syntax. 
